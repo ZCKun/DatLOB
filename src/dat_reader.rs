@@ -38,7 +38,6 @@ pub struct DatReader {
 
 unsafe fn cast_ref<'a, T>(bytes: &'a [u8]) -> &'a T {
     // assert correct endianness somehow
-    println!("{:?}", bytes);
     assert_eq!(bytes.len(), std::mem::size_of::<T>());
     let ptr: *const u8 = bytes.as_ptr();
     assert_eq!(ptr.align_offset(std::mem::align_of::<T>()), 0);
@@ -60,9 +59,9 @@ impl DatReader {
     pub fn read(&mut self) {
         while !self.buf_reader.fill_buf().unwrap().is_empty() {
             let header = Header::new(&mut self.buf_reader);
-            if header.r#type == 2105350 {
+            if header.r#type == 0x00202006 {
                 let mut data = vec![0; header.data_len as usize];
-                self.buf_reader.read(&mut data);
+                self.buf_reader.read(&mut data).unwrap();
                 let order = unsafe { cast_ref::<SzL2Order>(&data) };
                 println!("{:?}", order);
             }
