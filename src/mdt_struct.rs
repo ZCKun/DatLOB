@@ -13,15 +13,17 @@ pub struct SzL2Order {
     pub(crate) r#type: u8  // 1
 }
 
+#[derive(Copy, Clone, Debug)]
 #[repr(C, align(8))]
 pub struct SzL2Trans {
     pub(crate) rec_time: u64,
-    pub(crate) trade_id: u32,
-    pub(crate) bid_order_id: i64,
-    pub(crate) ask_order_id: i64,
+    pub(crate) set_id: u32,
+    pub(crate) trade_id: u64,
+    pub(crate) bid_order_id: u64,
+    pub(crate) ask_order_id: u64,
     pub(crate) symbol_code: [u8; 40],
     pub(crate) symbol_source: [u8; 5],
-    pub(crate) trade_time: i32,
+    pub(crate) trade_time: i64,
     pub(crate) price: f64,
     pub(crate) qty: f64,
     pub(crate) trade_flag: u8,

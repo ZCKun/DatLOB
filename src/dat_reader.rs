@@ -1,8 +1,9 @@
 use std::io::{Read, BufRead, BufReader};
 use byteorder::{LittleEndian, ByteOrder};
 use std::fs::{File, OpenOptions};
-use crate::mdt_struct::SzL2Order;
+use crate::mdt_struct::{SzL2Order, SzL2Trans};
 use crate::mdt_type::DataType;
+use serde_json::error::Category::Data;
 
 /// dat 头结构
 #[derive(Debug)]
@@ -38,7 +39,10 @@ pub struct DatReader {
 
 unsafe fn cast_ref<'a, T>(bytes: &'a [u8]) -> &'a T {
     // assert correct endianness somehow
-    assert_eq!(bytes.len(), std::mem::size_of::<T>());
+    if bytes.len() != std::mem::size_of::<T>() {
+        let i = 0;
+        assert_eq!(bytes.len(), std::mem::size_of::<T>());
+    }
     let ptr: *const u8 = bytes.as_ptr();
     assert_eq!(ptr.align_offset(std::mem::align_of::<T>()), 0);
 
@@ -59,11 +63,19 @@ impl DatReader {
     pub fn read(&mut self) {
         while !self.buf_reader.fill_buf().unwrap().is_empty() {
             let header = Header::new(&mut self.buf_reader);
-            if header.r#type == 0x00202006 {
-                let mut data = vec![0; header.data_len as usize];
-                self.buf_reader.read(&mut data).unwrap();
+            if header.data_len < 0 {
+                continue;
+            }
+
+            let mut data = vec![0; header.data_len as usize];
+            self.buf_reader.read(&mut data).unwrap();
+
+            if header.r#type == DataType::SZSE_L2_Order as i32 {
                 let order = unsafe { cast_ref::<SzL2Order>(&data) };
-                println!("{:?}", order);
+                // println!("Order => {:?}", order);
+            } else if header.r#type == DataType::SZSE_L2_Transaction as i32 {
+                let trade = unsafe { cast_ref::<SzL2Trans>(&data) };
+                // println!("Trade => {:?}", trade);
             }
         }
     }

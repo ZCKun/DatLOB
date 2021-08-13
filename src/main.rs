@@ -6,6 +6,7 @@ use crate::types::{Order, Trade, TradeType};
 use std::io::{BufReader, Read};
 use byteorder::{LittleEndian, ByteOrder};
 use crate::dat_reader::{Header, DatReader};
+use crate::mdt_type::DataType;
 
 mod book;
 mod types;
@@ -110,8 +111,8 @@ fn main() {
     // let mut book = Book::new();
     // test_from_csv(&mut book);
     // test_from_json(&mut book);
-    let file_path = "C:/Users/x2h1z/Desktop/Data/dat/aa/202108020705.dat";
-    // let file_path = "/Users/2h0x/Data/dat/202107140705.dat";
+    // let file_path = "C:/Users/x2h1z/Desktop/Data/dat/aa/202108020705.dat";
+    let file_path = "/Users/2h0x/Data/dat/202107140705.dat";
     let mut reader = DatReader::new(file_path);
     reader.read();
 
