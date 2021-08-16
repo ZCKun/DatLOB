@@ -37,10 +37,10 @@ pub struct DatReader {
     buf_reader: BufReader<File>,
 }
 
-unsafe fn cast_ref<'a, T>(bytes: &'a [u8]) -> &'a T {
+unsafe fn cast_ref<'a, T>(bytes: &'a [u8], i: i64) -> &'a T {
     // assert correct endianness somehow
-    if bytes.len() != std::mem::size_of::<T>() {
-        let i = 0;
+    if bytes.len() != std::mem::size_of::<T>(){
+        println!("current i: {}", i);
         assert_eq!(bytes.len(), std::mem::size_of::<T>());
     }
     let ptr: *const u8 = bytes.as_ptr();
@@ -61,6 +61,7 @@ impl DatReader {
     }
 
     pub fn read(&mut self) {
+        let mut count = 0i64;
         while !self.buf_reader.fill_buf().unwrap().is_empty() {
             let header = Header::new(&mut self.buf_reader);
             if header.data_len < 0 {
@@ -71,12 +72,13 @@ impl DatReader {
             self.buf_reader.read(&mut data).unwrap();
 
             if header.r#type == DataType::SZSE_L2_Order as i32 {
-                let order = unsafe { cast_ref::<SzL2Order>(&data) };
+                let order = unsafe { cast_ref::<SzL2Order>(&data, i) };
                 // println!("Order => {:?}", order);
             } else if header.r#type == DataType::SZSE_L2_Transaction as i32 {
-                let trade = unsafe { cast_ref::<SzL2Trans>(&data) };
+                let trade = unsafe { cast_ref::<SzL2Trans>(&data, i) };
                 // println!("Trade => {:?}", trade);
             }
+            count += 1;
         }
     }
 }
